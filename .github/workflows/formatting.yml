@@ -13,23 +13,25 @@ permissions:
 
 jobs:
   formatting:
+    name: C++ Formatting
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
       - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-format-18
 
-      - name: Check formatting
+      - name: Check C++ formatting
         shell: bash
         run: |
-          mapfile -t files < <(
-            find app bacus-core bacus-security bacus-vault tests \
-              -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) \
-              2>/dev/null | sort
+          set -euo pipefail
+
+          mapfile -d '' -t files < <(
+            git ls-files -z -- '*.cpp' '*.hpp' '*.h'
           )
 
           if [ "${#files[@]}" -eq 0 ]; then
@@ -37,4 +39,6 @@ jobs:
             exit 0
           fi
 
-          clang-format --dry-run --Werror "${files[@]}"
+          clang-format-18 --dry-run --Werror "${files[@]}"
+
+          echo "All C++ files follow the formatting rules."
