@@ -1,0 +1,31 @@
+
+name: Security concern
+description: Informar de una posible preocupación de seguridad.
+title: "[SECURITY] Security concern"
+labels:
+  - security
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Aviso de seguridad
+
+        No publiques aquí contraseñas, tokens, datos personales,
+        exploits ni instrucciones para reproducir una vulnerabilidad.
+
+        Para informar una vulnerabilidad real, utiliza el mecanismo
+        privado de GitHub Security Advisories del repositorio:
+
+        https://github.com/ciberspar/bacus-explorer/security/advisories/new
+
+        Esta plantilla sirve únicamente para comunicar que tienes
+        una preocupación de seguridad sin revelar detalles sensibles.
+
+  - type: textarea
+    id: concern
+    attributes:
+      label: Resumen no sensible
+      description: Describe brevemente el área afectada sin revelar detalles técnicos sensibles.
+    validations:
+      required: true
