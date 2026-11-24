@@ -41,7 +41,7 @@ void on_application_activate(
 int main(int argc, char** argv) {
     GtkApplication* application = gtk_application_new(
         "com.guafguaf.bacus-explorer",
-        G_APPLICATION_DEFAULT_FLAGS
+        G_APPLICATION_FLAGS_NONE
     );
 
     g_signal_connect(
