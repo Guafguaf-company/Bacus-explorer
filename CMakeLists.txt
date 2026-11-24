@@ -40,6 +40,7 @@ pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 add_executable(bacus-explorer
     app/main.cpp
     app/browser_window.cpp
+    app/internal_pages.cpp
 )
 
 target_include_directories(bacus-explorer PRIVATE
