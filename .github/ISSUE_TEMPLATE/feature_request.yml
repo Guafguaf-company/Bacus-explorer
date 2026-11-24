@@ -1,0 +1,48 @@
+
+name: Feature request
+description: Proponer una nueva función.
+title: "[FEATURE] "
+labels:
+  - enhancement
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema o necesidad
+      description: ¿Qué necesidad resolvería esta función?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución propuesta
+      description: Explica cómo debería funcionar.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Módulo relacionado
+      options:
+        - Interfaz
+        - Chromium
+        - Seguridad
+        - Bacus Vault
+        - Multimedia
+        - Rendimiento
+        - Sincronización
+        - Configuración
+        - Otro
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas
+      description: Otras soluciones que hayas considerado.
+    validations:
+      required: false
