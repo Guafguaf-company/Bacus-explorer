@@ -1,6 +1,7 @@
 #include "browser_window.hpp"
 
 #include "bacus-core/browser_config.hpp"
+#include "internal_pages.hpp"
 
 #include <string>
 
@@ -57,7 +58,6 @@ BrowserWindow::BrowserWindow(GtkApplication* application) {
     gtk_widget_set_tooltip_text(forward_button, "Adelante");
     gtk_widget_set_tooltip_text(reload_button, "Recargar");
 
-    // These controls will be activated with Chromium integration.
     gtk_widget_set_sensitive(back_button, FALSE);
     gtk_widget_set_sensitive(forward_button, FALSE);
     gtk_widget_set_sensitive(reload_button, FALSE);
@@ -70,7 +70,7 @@ BrowserWindow::BrowserWindow(GtkApplication* application) {
 
     gtk_entry_set_placeholder_text(
         GTK_ENTRY(address_entry_),
-        "Escribe una dirección web..."
+        "Escribe una dirección web o about:..."
     );
 
     gtk_widget_set_hexpand(address_entry_, TRUE);
@@ -132,7 +132,10 @@ BrowserWindow::BrowserWindow(GtkApplication* application) {
     // Tab system
     notebook_ = gtk_notebook_new();
 
-    gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook_), TRUE);
+    gtk_notebook_set_scrollable(
+        GTK_NOTEBOOK(notebook_),
+        TRUE
+    );
 
     gtk_widget_set_hexpand(notebook_, TRUE);
     gtk_widget_set_vexpand(notebook_, TRUE);
@@ -177,19 +180,9 @@ GtkWidget* BrowserWindow::create_tab(
     const char* title,
     const char* address
 ) {
-    GtkWidget* page = gtk_label_new(
-        "Bienvenido a Bacus Explorer\n\n"
-        "El motor Chromium se integrará en una próxima etapa."
-    );
-
-    gtk_label_set_justify(
-        GTK_LABEL(page),
-        GTK_JUSTIFY_CENTER
-    );
-
-    gtk_label_set_line_wrap(
-        GTK_LABEL(page),
-        TRUE
+    GtkWidget* page = gtk_box_new(
+        GTK_ORIENTATION_VERTICAL,
+        0
     );
 
     gtk_widget_set_hexpand(page, TRUE);
@@ -200,6 +193,16 @@ GtkWidget* BrowserWindow::create_tab(
         "bacus-address",
         g_strdup(address),
         g_free
+    );
+
+    GtkWidget* content = create_internal_page(address);
+
+    gtk_box_pack_start(
+        GTK_BOX(page),
+        content,
+        TRUE,
+        TRUE,
+        0
     );
 
     GtkWidget* tab_label = gtk_label_new(title);
@@ -219,7 +222,7 @@ GtkWidget* BrowserWindow::create_tab(
 void BrowserWindow::add_tab() {
     create_tab(
         "Nueva pestaña",
-        bacus::core::DEFAULT_HOME.data()
+        "about:newtab"
     );
 
     const gint page_count = gtk_notebook_get_n_pages(
@@ -265,13 +268,15 @@ void BrowserWindow::navigate() {
         return;
     }
 
-    std::string message = "Dirección preparada: ";
-    message += address;
-
-    gtk_label_set_text(
-        GTK_LABEL(page),
-        message.c_str()
+    GList* children = gtk_container_get_children(
+        GTK_CONTAINER(page)
     );
+
+    for (GList* item = children; item != nullptr; item = item->next) {
+        gtk_widget_destroy(GTK_WIDGET(item->data));
+    }
+
+    g_list_free(children);
 
     g_object_set_data_full(
         G_OBJECT(page),
@@ -280,9 +285,22 @@ void BrowserWindow::navigate() {
         g_free
     );
 
-    update_status(
-        "La navegación web estará disponible al integrar Chromium."
+    GtkWidget* content = create_internal_page(address);
+
+    gtk_box_pack_start(
+        GTK_BOX(page),
+        content,
+        TRUE,
+        TRUE,
+        0
     );
+
+    gtk_widget_show_all(page);
+
+    std::string message = "Dirección interna: ";
+    message += address;
+
+    update_status(message.c_str());
 }
 
 void BrowserWindow::on_new_tab_clicked(
