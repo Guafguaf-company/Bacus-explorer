@@ -1,0 +1,35 @@
+
+name: Bacus Explorer - License Check
+
+on:
+  push:
+    branches: [main, pruebas]
+  pull_request:
+    branches: [main, pruebas]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  license:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify license file
+        run: |
+          test -f LICENSE || test -f LICENSE.md
+
+          if ! grep -q "Mozilla Public License" LICENSE*; then
+            echo "MPL-2.0 license text was not found."
+            exit 1
+          fi
+
+          if ! grep -q "Version 2.0" LICENSE*; then
+            echo "Expected MPL version 2.0."
+            exit 1
+          fi
+
+          echo "Repository license file detected: MPL-2.0"
