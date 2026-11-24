@@ -1,4 +1,3 @@
-
 #include "browser_window.hpp"
 
 #include "bacus-core/browser_config.hpp"
@@ -10,57 +9,229 @@ namespace bacus::app {
 BrowserWindow::BrowserWindow(GtkApplication* application) {
     window_ = gtk_application_window_new(application);
 
-    gtk_window_set_title(GTK_WINDOW(window_), bacus::core::BROWSER_NAME.data());
+    gtk_window_set_title(
+        GTK_WINDOW(window_),
+        bacus::core::BROWSER_NAME.data()
+    );
 
-    gtk_window_set_default_size(GTK_WINDOW(window_), bacus::core::DEFAULT_WINDOW_WIDTH,
-                                bacus::core::DEFAULT_WINDOW_HEIGHT);
+    gtk_window_set_default_size(
+        GTK_WINDOW(window_),
+        bacus::core::DEFAULT_WINDOW_WIDTH,
+        bacus::core::DEFAULT_WINDOW_HEIGHT
+    );
 
-    GtkWidget* root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    GtkWidget* root = gtk_box_new(
+        GTK_ORIENTATION_VERTICAL,
+        6
+    );
 
-    gtk_container_set_border_width(GTK_CONTAINER(root), 12);
+    gtk_container_set_border_width(
+        GTK_CONTAINER(root),
+        8
+    );
 
-    gtk_container_add(GTK_CONTAINER(window_), root);
+    gtk_container_add(
+        GTK_CONTAINER(window_),
+        root
+    );
 
     // Navigation toolbar
-    GtkWidget* toolbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
+    GtkWidget* toolbar = gtk_box_new(
+        GTK_ORIENTATION_HORIZONTAL,
+        6
+    );
 
-    gtk_box_pack_start(GTK_BOX(root), toolbar, FALSE, FALSE, 0);
+    gtk_box_pack_start(
+        GTK_BOX(root),
+        toolbar,
+        FALSE,
+        FALSE,
+        0
+    );
+
+    GtkWidget* back_button = gtk_button_new_with_label("←");
+    GtkWidget* forward_button = gtk_button_new_with_label("→");
+    GtkWidget* reload_button = gtk_button_new_with_label("⟳");
+
+    gtk_widget_set_tooltip_text(back_button, "Atrás");
+    gtk_widget_set_tooltip_text(forward_button, "Adelante");
+    gtk_widget_set_tooltip_text(reload_button, "Recargar");
+
+    // These controls will be activated with Chromium integration.
+    gtk_widget_set_sensitive(back_button, FALSE);
+    gtk_widget_set_sensitive(forward_button, FALSE);
+    gtk_widget_set_sensitive(reload_button, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(toolbar), back_button, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(toolbar), forward_button, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(toolbar), reload_button, FALSE, FALSE, 0);
 
     address_entry_ = gtk_entry_new();
 
-    gtk_entry_set_placeholder_text(GTK_ENTRY(address_entry_), "Escribe una dirección web...");
-
-    gtk_entry_set_text(GTK_ENTRY(address_entry_), bacus::core::DEFAULT_HOME.data());
+    gtk_entry_set_placeholder_text(
+        GTK_ENTRY(address_entry_),
+        "Escribe una dirección web..."
+    );
 
     gtk_widget_set_hexpand(address_entry_, TRUE);
 
-    gtk_box_pack_start(GTK_BOX(toolbar), address_entry_, TRUE, TRUE, 0);
+    gtk_box_pack_start(
+        GTK_BOX(toolbar),
+        address_entry_,
+        TRUE,
+        TRUE,
+        0
+    );
 
     GtkWidget* navigate_button = gtk_button_new_with_label("Ir");
 
-    gtk_box_pack_start(GTK_BOX(toolbar), navigate_button, FALSE, FALSE, 0);
+    gtk_box_pack_start(
+        GTK_BOX(toolbar),
+        navigate_button,
+        FALSE,
+        FALSE,
+        0
+    );
 
-    g_signal_connect(navigate_button, "clicked", G_CALLBACK(on_navigate_clicked), this);
+    GtkWidget* new_tab_button = gtk_button_new_with_label("+");
 
-    g_signal_connect(address_entry_, "activate", G_CALLBACK(on_address_activate), this);
+    gtk_widget_set_tooltip_text(
+        new_tab_button,
+        "Nueva pestaña"
+    );
 
-    // Page area
-    page_label_ = gtk_label_new("Bienvenido a Bacus Explorer\n\n"
-                                "El motor Chromium se integrará en una próxima etapa.");
+    gtk_box_pack_start(
+        GTK_BOX(toolbar),
+        new_tab_button,
+        FALSE,
+        FALSE,
+        0
+    );
 
-    gtk_label_set_justify(GTK_LABEL(page_label_), GTK_JUSTIFY_CENTER);
+    g_signal_connect(
+        navigate_button,
+        "clicked",
+        G_CALLBACK(on_navigate_clicked),
+        this
+    );
 
-    gtk_widget_set_hexpand(page_label_, TRUE);
-    gtk_widget_set_vexpand(page_label_, TRUE);
+    g_signal_connect(
+        new_tab_button,
+        "clicked",
+        G_CALLBACK(on_new_tab_clicked),
+        this
+    );
 
-    gtk_box_pack_start(GTK_BOX(root), page_label_, TRUE, TRUE, 0);
+    g_signal_connect(
+        address_entry_,
+        "activate",
+        G_CALLBACK(on_address_activate),
+        this
+    );
+
+    // Tab system
+    notebook_ = gtk_notebook_new();
+
+    gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook_), TRUE);
+
+    gtk_widget_set_hexpand(notebook_, TRUE);
+    gtk_widget_set_vexpand(notebook_, TRUE);
+
+    gtk_box_pack_start(
+        GTK_BOX(root),
+        notebook_,
+        TRUE,
+        TRUE,
+        0
+    );
+
+    g_signal_connect(
+        notebook_,
+        "switch-page",
+        G_CALLBACK(on_switch_page),
+        this
+    );
 
     // Status bar
-    status_label_ = gtk_label_new("Bacus Explorer 0.1.0 | Motor web pendiente de integración");
+    status_label_ = gtk_label_new(
+        "Bacus Explorer 0.1.0 | Preparado"
+    );
 
-    gtk_widget_set_halign(status_label_, GTK_ALIGN_START);
+    gtk_widget_set_halign(
+        status_label_,
+        GTK_ALIGN_START
+    );
 
-    gtk_box_pack_start(GTK_BOX(root), status_label_, FALSE, FALSE, 0);
+    gtk_box_pack_start(
+        GTK_BOX(root),
+        status_label_,
+        FALSE,
+        FALSE,
+        0
+    );
+
+    add_tab();
+}
+
+GtkWidget* BrowserWindow::create_tab(
+    const char* title,
+    const char* address
+) {
+    GtkWidget* page = gtk_label_new(
+        "Bienvenido a Bacus Explorer\n\n"
+        "El motor Chromium se integrará en una próxima etapa."
+    );
+
+    gtk_label_set_justify(
+        GTK_LABEL(page),
+        GTK_JUSTIFY_CENTER
+    );
+
+    gtk_label_set_line_wrap(
+        GTK_LABEL(page),
+        TRUE
+    );
+
+    gtk_widget_set_hexpand(page, TRUE);
+    gtk_widget_set_vexpand(page, TRUE);
+
+    g_object_set_data_full(
+        G_OBJECT(page),
+        "bacus-address",
+        g_strdup(address),
+        g_free
+    );
+
+    GtkWidget* tab_label = gtk_label_new(title);
+
+    gtk_notebook_append_page(
+        GTK_NOTEBOOK(notebook_),
+        page,
+        tab_label
+    );
+
+    gtk_widget_show_all(page);
+    gtk_widget_show_all(tab_label);
+
+    return page;
+}
+
+void BrowserWindow::add_tab() {
+    create_tab(
+        "Nueva pestaña",
+        bacus::core::DEFAULT_HOME.data()
+    );
+
+    const gint page_count = gtk_notebook_get_n_pages(
+        GTK_NOTEBOOK(notebook_)
+    );
+
+    gtk_notebook_set_current_page(
+        GTK_NOTEBOOK(notebook_),
+        page_count - 1
+    );
+
+    update_status("Nueva pestaña creada.");
 }
 
 void BrowserWindow::show() {
@@ -68,37 +239,94 @@ void BrowserWindow::show() {
 }
 
 void BrowserWindow::update_status(const char* message) {
-    gtk_label_set_text(GTK_LABEL(status_label_), message);
+    gtk_label_set_text(
+        GTK_LABEL(status_label_),
+        message
+    );
 }
 
 void BrowserWindow::navigate() {
-    const char* address = gtk_entry_get_text(GTK_ENTRY(address_entry_));
+    const char* address = gtk_entry_get_text(
+        GTK_ENTRY(address_entry_)
+    );
 
     if (address == nullptr || *address == '\0') {
         update_status("Escribe una dirección antes de continuar.");
         return;
     }
 
-    // This first version intentionally does not load remote content.
-    // Chromium integration will provide actual navigation later.
+    GtkWidget* page = gtk_notebook_get_nth_page(
+        GTK_NOTEBOOK(notebook_),
+        gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook_))
+    );
+
+    if (page == nullptr) {
+        update_status("No hay ninguna pestaña activa.");
+        return;
+    }
 
     std::string message = "Dirección preparada: ";
-
     message += address;
 
-    gtk_label_set_text(GTK_LABEL(page_label_), message.c_str());
+    gtk_label_set_text(
+        GTK_LABEL(page),
+        message.c_str()
+    );
 
-    update_status("La navegación web estará disponible al integrar Chromium.");
+    g_object_set_data_full(
+        G_OBJECT(page),
+        "bacus-address",
+        g_strdup(address),
+        g_free
+    );
+
+    update_status(
+        "La navegación web estará disponible al integrar Chromium."
+    );
 }
 
-void BrowserWindow::on_navigate_clicked(GtkButton*, gpointer user_data) {
+void BrowserWindow::on_new_tab_clicked(
+    GtkButton*,
+    gpointer user_data
+) {
+    auto* browser = static_cast<BrowserWindow*>(user_data);
+    browser->add_tab();
+}
+
+void BrowserWindow::on_navigate_clicked(
+    GtkButton*,
+    gpointer user_data
+) {
     auto* browser = static_cast<BrowserWindow*>(user_data);
     browser->navigate();
 }
 
-void BrowserWindow::on_address_activate(GtkEntry*, gpointer user_data) {
+void BrowserWindow::on_address_activate(
+    GtkEntry*,
+    gpointer user_data
+) {
     auto* browser = static_cast<BrowserWindow*>(user_data);
     browser->navigate();
+}
+
+void BrowserWindow::on_switch_page(
+    GtkNotebook*,
+    GtkWidget* page,
+    guint,
+    gpointer user_data
+) {
+    auto* browser = static_cast<BrowserWindow*>(user_data);
+
+    const char* address = static_cast<const char*>(
+        g_object_get_data(G_OBJECT(page), "bacus-address")
+    );
+
+    gtk_entry_set_text(
+        GTK_ENTRY(browser->address_entry_),
+        address != nullptr ? address : ""
+    );
+
+    browser->update_status("Pestaña activa.");
 }
 
 } // namespace bacus::app
