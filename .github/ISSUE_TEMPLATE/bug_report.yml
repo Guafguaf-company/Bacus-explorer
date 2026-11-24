@@ -1,0 +1,56 @@
+
+name: Bug report
+description: Reportar un error de Bacus Explorer.
+title: "[BUG] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por ayudar a mejorar Bacus Explorer.
+        No incluyas contraseñas, tokens ni información privada.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Explica qué ocurrió.
+      placeholder: Describe el problema.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. Abrir Bacus Explorer.
+        2. ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Sistema operativo
+      placeholder: "Linux Mint 22.3 MATE"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Registros
+      description: Elimina cualquier dato privado antes de compartirlos.
+      render: text
+    validations:
+      required: false
