@@ -1,0 +1,9 @@
+
+# Default repository owner
+* @ciberspar
+
+# Security-sensitive components
+/bacus-security/ @ciberspar
+/bacus-vault/ @ciberspar
+/chromium/ @ciberspar
+/.github/workflows/ @ciberspar
