@@ -1,0 +1,11 @@
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: Security Advisories
+    url: https://github.com/ciberspar/bacus-explorer/security/advisories/new
+    about: Informar vulnerabilidades mediante el canal privado de GitHub.
+
+  - name: GitHub Discussions
+    url: https://github.com/ciberspar/bacus-explorer/discussions
+    about: Preguntas, ideas y conversaciones generales.
