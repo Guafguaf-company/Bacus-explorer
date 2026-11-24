@@ -1,0 +1,22 @@
+
+#include "bacus-core/browser_config.hpp"
+
+#include <cassert>
+#include <iostream>
+
+int main() {
+    using namespace bacus::core;
+
+    assert(BROWSER_NAME == "Bacus Explorer");
+    assert(VERSION == "0.1.0");
+    assert(COMPANY == "Guafguaf Company");
+
+    assert(DEFAULT_WINDOW_WIDTH > 0);
+    assert(DEFAULT_WINDOW_HEIGHT > 0);
+
+    assert(DEFAULT_HOME == "about:blank");
+
+    std::cout << "All Bacus Explorer configuration tests passed!\n";
+
+    return 0;
+}
